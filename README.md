@@ -91,4 +91,12 @@ The tool will then connect to the databases, validate schemas, and migrate the d
 
 ## 📜 License
 
-[Specify your license here, e.g., MIT License]
+This project is licensed under [The Unlicense](https://unlicense.org/).
+
+This means:
+- You can use it for private or commercial purposes
+- You can modify and distribute it freely
+- No warranty or liability is provided
+- The work is dedicated to the public domain
+
+See the [LICENSE](LICENSE) file for more details.
