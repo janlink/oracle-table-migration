@@ -6,9 +6,6 @@ build-backend = "setuptools.build_meta"
 name = "oracle-table-migration"
 version = "0.1.0"
 description = "A tool for migrating tables between Oracle databases"
-authors = [
-    {name = "Your Name", email = "your.email@example.com"}
-]
 readme = "README.md"
 requires-python = ">=3.8"
 classifiers = [
