@@ -1,0 +1,38 @@
+[build-system]
+requires = ["setuptools>=42", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "oracle-table-migration"
+version = "0.1.0"
+description = "A tool for migrating tables between Oracle databases"
+authors = [
+    {name = "Your Name", email = "your.email@example.com"}
+]
+readme = "README.md"
+requires-python = ">=3.8"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+dependencies = [
+    "oracledb>=1.3.0",
+    "pyyaml>=6.0",
+    "rich>=13.3.0",
+    "tqdm>=4.65.0",
+    "python-dotenv>=1.0.0",
+    "pytest>=7.3.1",
+]
+
+[project.scripts]
+oracle-migrate = "oracle_table_migration.main:main"
+
+[tool.setuptools]
+package-dir = {"" = "."}
+packages = ["oracle_table_migration"]
+package-data = {"oracle_table_migration" = ["py.typed"]}
+
+[tool.pytest]
+testpaths = ["tests"]
+python_files = "test_*.py"

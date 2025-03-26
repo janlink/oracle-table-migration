@@ -1,0 +1,17 @@
+# Template configuration for Oracle Table Migration Tool
+# Copy this file to migration_config.yaml and adjust according to your needs
+
+tables:
+  # Full table migration example
+  - name: YOUR_TABLE
+    mode: full
+    existing_table_behavior: drop_and_recreate  # Options: drop_and_recreate, append_if_compatible
+    
+  # Custom query migration example
+  - name: YOUR_FILTERED_TABLE
+    mode: custom
+    existing_table_behavior: append_if_compatible
+    query: |
+      SELECT *
+      FROM YOUR_FILTERED_TABLE
+      WHERE your_condition = 'value'
