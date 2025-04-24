@@ -37,7 +37,7 @@ tnsnames.ora
 # Environment variables and configurations
 .env
 *.env
-config/migration_config.yaml
+config/*
 !config/migration_config.yaml.template
 
 # Logs
