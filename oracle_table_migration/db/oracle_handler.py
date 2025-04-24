@@ -115,8 +115,6 @@ class OracleHandler(DatabaseConnection):
             
         try:
             result = self.execute_non_query(index_ddl)
-            if result:
-                logger.info("Successfully created index")
             return result
             
         except Exception as e:

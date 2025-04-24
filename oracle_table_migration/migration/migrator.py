@@ -215,7 +215,7 @@ class TableMigrator:
         Returns:
             bool: True if successful, False otherwise
         """
-        logger.info(f"Starting migration for table {table_name}")
+        logger.info(f"\n---- Starting migration for table {table_name} ----")
         
         table_exists = self.schema_validator.table_exists(self.target_conn, table_name)
         schemas_match = self.schema_validator.schemas_match(table_name) if table_exists else False
