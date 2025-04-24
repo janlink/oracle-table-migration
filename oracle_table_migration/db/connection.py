@@ -18,6 +18,7 @@ class DatabaseConnection:
         self.username = config.get('username')
         self.password = config.get('password')
         self.dsn = config.get('dsn')
+        self.schema = config.get('schema')
         self.connection = None
         self.cursor = None
 
@@ -36,6 +37,11 @@ class DatabaseConnection:
                 dsn=self.dsn
             )
             self.cursor = self.connection.cursor()
+            
+            if self.schema:
+                self.cursor.execute(f"ALTER SESSION SET CURRENT_SCHEMA = {self.schema}")
+                logger.info(f"Set current schema to {self.schema}")
+                
             logger.info(f"Connected successfully to {self.dsn}")
             return True
         except oracledb.Error as e:

@@ -44,12 +44,17 @@ Whether you need to move entire tables, specific subsets of data using custom qu
         SOURCE_DB_USERNAME=your_source_username
         SOURCE_DB_PASSWORD=your_source_password
         SOURCE_DB_DSN=your_source_host:1521/service_name
+        # Optional: Specify the source schema to validate against
+        # If omitted, the user's default schema will be used.
+        SOURCE_DB_SCHEMA=your_source_schema
 
         TARGET_DB_USERNAME=your_target_username
         TARGET_DB_PASSWORD=your_target_password
         TARGET_DB_DSN=your_target_host:1521/service_name
+        # Optional: Specify the target schema where tables should be created/migrated
+        TARGET_DB_SCHEMA=your_target_schema
         ```
-    *(Note: The tool uses `python-dotenv` to load these variables)*
+    *(Note: The tool uses `python-dotenv` to load these variables. If `TARGET_DB_SCHEMA` is omitted, the user's default schema will be used.)*
 
 2.  **Migration Tasks:**
     *   Copy the template `config/migration_config.yaml.template` to `config/migration_config.yaml`.

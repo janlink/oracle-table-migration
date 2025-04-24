@@ -38,7 +38,8 @@ class ConfigLoader:
         return {
             'username': os.getenv('SOURCE_DB_USERNAME'),
             'password': os.getenv('SOURCE_DB_PASSWORD'),
-            'dsn': os.getenv('SOURCE_DB_DSN')
+            'dsn': os.getenv('SOURCE_DB_DSN'),
+            'schema': os.getenv('SOURCE_DB_SCHEMA', '')
         }
     
     def get_target_db_config(self) -> Dict[str, str]:
@@ -46,7 +47,8 @@ class ConfigLoader:
         return {
             'username': os.getenv('TARGET_DB_USERNAME'),
             'password': os.getenv('TARGET_DB_PASSWORD'),
-            'dsn': os.getenv('TARGET_DB_DSN')
+            'dsn': os.getenv('TARGET_DB_DSN'),
+            'schema': os.getenv('TARGET_DB_SCHEMA', '')
         }
     
     def get_tables_config(self) -> List[Dict[str, Any]]:
