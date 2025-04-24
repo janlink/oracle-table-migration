@@ -105,16 +105,25 @@ class TableMigrator:
             
         Returns:
             int: Row count
-        """
-        if custom_query:
-            count_query = f"SELECT COUNT(*) FROM ({custom_query})"
-            logger.info(f"Executing row count query for custom query on table {table_name}")
-        else:
-            count_query = f"SELECT COUNT(*) FROM {table_name}"
-            logger.info(f"Executing row count query for table {table_name}")
             
-        result = self.source_conn.execute_query(count_query)
-        return result[0][0] if result else 0
+        Raises:
+            Exception: If query execution fails
+        """
+        try:
+            if custom_query:
+                count_query = f"SELECT COUNT(*) FROM ({custom_query})"
+                logger.info(f"Executing row count query for custom query on table {table_name}")
+            else:
+                count_query = f"SELECT COUNT(*) FROM {table_name}"
+                logger.info(f"Executing row count query for table {table_name}")
+                
+            result = self.source_conn.execute_query(count_query)
+            if not result:
+                raise Exception("No results returned from row count query")
+            return result[0][0]
+        except Exception as e:
+            logger.error(f"Failed to get row count for table {table_name}: {e}")
+            raise Exception(f"Row count query failed for table {table_name}") from e
         
     def get_data(self, table_name: str, custom_query: Optional[str] = None, chunk_size: Optional[int] = None) -> List[Tuple]:
         """
@@ -235,10 +244,14 @@ class TableMigrator:
                 return False
         
         # Get row count for progress tracking
-        row_count = self.get_row_count(table_name, custom_query) if mode == "custom" and custom_query else self.get_row_count(table_name)
-        if row_count == 0:
-            logger.warning(f"No data found for table {table_name}")
-            return True
+        try:
+            row_count = self.get_row_count(table_name, custom_query) if mode == "custom" and custom_query else self.get_row_count(table_name)
+            if row_count == 0:
+                logger.warning(f"No data found for table {table_name}")
+                return True
+        except Exception as e:
+            logger.error(f"Failed to migrate table {table_name}: {e}")
+            return False
             
         # Get column information for type conversion
         column_types = self.schema_validator.get_table_schema(self.source_conn, table_name)
