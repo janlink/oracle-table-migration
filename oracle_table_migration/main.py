@@ -8,7 +8,7 @@ from rich.console import Console
 from rich.panel import Panel
 
 from oracle_table_migration.config.config_loader import ConfigLoader
-from oracle_table_migration.db.connection import DatabaseConnection
+from oracle_table_migration.db.oracle_handler import OracleHandler
 from oracle_table_migration.migration.migrator import TableMigrator
 from oracle_table_migration.utils.logger import logger
 
@@ -43,8 +43,8 @@ def main():
         source_config = config.get_source_db_config()
         target_config = config.get_target_db_config()
         
-        source_db = DatabaseConnection(source_config)
-        target_db = DatabaseConnection(target_config)
+        source_db = OracleHandler(source_config)
+        target_db = OracleHandler(target_config)
         
         # Connect to databases
         if not source_db.connect():
@@ -55,8 +55,9 @@ def main():
             logger.error("Failed to connect to target database")
             return 1
         
-        # Create migrator and process tables
-        migrator = TableMigrator(source_db, target_db)
+        # Get migration settings and create migrator
+        migration_settings = config.get_migration_settings()
+        migrator = TableMigrator(source_db, target_db, migration_settings)
         tables_config = config.get_tables_config()
         
         if not tables_config:

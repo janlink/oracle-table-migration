@@ -4,14 +4,15 @@ Table migrator module for Oracle Table Migration Tool.
 from typing import Dict, List, Any, Tuple, Optional
 import re
 import oracledb
-from oracle_table_migration.db.connection import DatabaseConnection
+from oracle_table_migration.db.oracle_handler import OracleHandler
 from oracle_table_migration.db.schema_validator import SchemaValidator
 from oracle_table_migration.utils.logger import logger, create_progress_bar
 
 class TableMigrator:
     """Class for migrating tables between Oracle databases."""
     
-    def __init__(self, source_conn: DatabaseConnection, target_conn: DatabaseConnection):
+    def __init__(self, source_conn: OracleHandler, target_conn: OracleHandler,
+                migration_settings: Dict[str, Any]):
         """
         Initialize table migrator.
         
@@ -22,6 +23,7 @@ class TableMigrator:
         self.source_conn = source_conn
         self.target_conn = target_conn
         self.schema_validator = SchemaValidator(source_conn, target_conn)
+        self.migrate_indexes_globally = migration_settings.get('migrate_indexes_globally', False)
 
     def get_column_type(self, data_type: str) -> Any:
         """
@@ -106,8 +108,10 @@ class TableMigrator:
         """
         if custom_query:
             count_query = f"SELECT COUNT(*) FROM ({custom_query})"
+            logger.info(f"Executing row count query for custom query on table {table_name}")
         else:
             count_query = f"SELECT COUNT(*) FROM {table_name}"
+            logger.info(f"Executing row count query for table {table_name}")
             
         result = self.source_conn.execute_query(count_query)
         return result[0][0] if result else 0
@@ -276,4 +280,58 @@ class TableMigrator:
                     return False
                     
         logger.info(f"Successfully migrated {rows_processed} rows for table {table_name}")
+
+        # Handle index migration if configured and data migration was successful
+        if self.migrate_indexes_globally:
+            logger.info(f"Global index migration enabled. Discovering indexes for {table_name}...")
+            if not self._migrate_indexes_for_table(table_name, table_name):
+                logger.warning(f"Index migration failed for {table_name}, but data was migrated successfully")
+
         return True
+
+    def _migrate_indexes_for_table(self, source_table: str, target_table: str) -> bool:
+        """
+        Migrate indexes from source table to target table.
+
+        Args:
+            source_table (str): Source table name
+            target_table (str): Target table name
+
+        Returns:
+            bool: True if all indexes were migrated successfully, False if any failed
+        """
+        try:
+            # Get source table indexes
+            indexes = self.source_conn.get_table_indexes(source_table)
+            if not indexes:
+                logger.info(f"No indexes found for table {source_table}")
+                return True
+
+            success = True
+            for index in indexes:
+                try:
+                    # Generate DDL for the index
+                    ddl = self.source_conn.generate_index_ddl(index, target_table)
+                    if not ddl:
+                        logger.error(f"Failed to generate DDL for index {index.name}")
+                        success = False
+                        continue
+
+                    # Create the index
+                    logger.info(f"Creating index {index.name} on {target_table}...")
+                    if not self.target_conn.create_index(ddl):
+                        logger.error(f"Failed to create index {index.name}")
+                        success = False
+                    else:
+                        logger.info(f"Successfully created index {index.name}")
+
+                except Exception as e:
+                    logger.error(f"Error creating index {index.name}: {e}")
+                    success = False
+                    continue
+
+            return success
+
+        except Exception as e:
+            logger.error(f"Error during index migration for table {source_table}: {e}")
+            return False

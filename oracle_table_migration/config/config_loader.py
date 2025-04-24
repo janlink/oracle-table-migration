@@ -53,6 +53,21 @@ class ConfigLoader:
         """Return tables configuration from YAML file."""
         return self.config.get('tables', [])
 
+    def get_migration_settings(self) -> Dict[str, Any]:
+        """
+        Get global migration settings from the configuration.
+        
+        Returns:
+            Dict[str, Any]: Migration settings including:
+                - migrate_indexes_globally (bool): Whether to migrate indexes by default
+                - default_chunk_size (int): Default chunk size for data migration
+        """
+        settings = self.config.get('settings', {})
+        return {
+            'migrate_indexes_globally': settings.get('migrate_indexes_globally', False),
+            'default_chunk_size': settings.get('default_chunk_size', 10000)
+        }
+
     def get_default_chunk_size(self) -> int:
         """Return the default chunk size from the settings."""
         settings = self.config.get('settings', {})

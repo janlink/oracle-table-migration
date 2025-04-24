@@ -1,16 +1,24 @@
 # Template configuration for Oracle Table Migration Tool
 # Copy this file to migration_config.yaml and adjust according to your needs
 
+# Global settings affecting all migrations
+settings:
+  default_chunk_size: 10000  # Number of rows to process in each batch
+  migrate_indexes_globally: false  # Whether to migrate indexes by default for all tables
+
 tables:
   # Full table migration example
   - name: YOUR_TABLE
     mode: full
     existing_table_behavior: drop_and_recreate  # Options: drop_and_recreate, append_if_compatible
+    chunk_size: 5000  # Optional: Override default_chunk_size for this table
+    migrate_indexes: true  # Optional: Override global index migration setting for this table
     
   # Custom query migration example
   - name: YOUR_FILTERED_TABLE
     mode: custom
     existing_table_behavior: append_if_compatible
+    migrate_indexes: false  # Optional: Disable index migration for this table
     query: |
       SELECT *
       FROM YOUR_FILTERED_TABLE

@@ -28,7 +28,12 @@ def mock_connections():
 def table_migrator(mock_connections):
     """Fixture to create a TableMigrator instance."""
     source_conn, target_conn = mock_connections
-    migrator = TableMigrator(source_conn, target_conn)
+    # Default migration settings for testing
+    migration_settings = {
+        'migrate_indexes_globally': False,
+        'default_chunk_size': 10000
+    }
+    migrator = TableMigrator(source_conn, target_conn, migration_settings)
     # Mock schema_validator to ensure it's a MagicMock object that supports assertion methods
     migrator.schema_validator = MagicMock()
     return migrator

@@ -1,8 +1,8 @@
 # Oracle Table Migration Tool 🚀
 
-✨ Seamlessly migrate tables between Oracle databases with this powerful and flexible Python tool! ✨
+✨ Seamlessly migrate tables and their indexes between Oracle databases with this powerful and flexible Python tool! ✨
 
-Whether you need to move entire tables or just specific subsets of data using custom queries, this tool simplifies the process, handling schema validation and creation automatically.
+Whether you need to move entire tables, specific subsets of data using custom queries, or include associated indexes, this tool simplifies the process, handling schema validation and creation automatically.
 
 ## 🌟 Features
 
@@ -10,6 +10,7 @@ Whether you need to move entire tables or just specific subsets of data using cu
 *   **Multiple Migration Modes:**
     *   `full`: Copy entire tables effortlessly.
     *   `custom`: Migrate specific data using your own SQL queries. 🎯
+*   **Index Migration:** Optionally migrate table indexes along with the data. Migration can be controlled globally or on a per-table basis. 🔑
 *   **Smart Schema Handling:** Automatically validates table schemas between source and target. If the target table doesn't exist or schemas don't match, it can create the table for you! 🏗️
 *   **Efficient Data Transfer:** Fetches and inserts data in configurable chunks to handle large tables gracefully. 📊
 *   **Progress Tracking:** Stay informed with visual progress bars during migration. ⏳
@@ -22,9 +23,16 @@ Whether you need to move entire tables or just specific subsets of data using cu
     git clone <your-repo-url>
     cd oracle-table-migration
     ```
-2.  Install the package (preferably in a virtual environment):
+2.  Install the package (preferably in a virtual environment using `uv`):
     ```bash
-    pip install -e .
+    # Example using uv (recommended)
+    uv venv
+    uv pip install -e .
+
+    # Or using pip
+    # python -m venv venv
+    # source venv/bin/activate  # On Windows use `venv\Scripts\activate`
+    # pip install -e .
     ```
 
 ## ⚙️ Configuration
@@ -45,32 +53,45 @@ Whether you need to move entire tables or just specific subsets of data using cu
 
 2.  **Migration Tasks:**
     *   Copy the template `config/migration_config.yaml.template` to `config/migration_config.yaml`.
-    *   Edit `config/migration_config.yaml` to define the tables and migration modes.
+    *   Edit `config/migration_config.yaml` to define the tables, migration modes, and index migration settings.
 
     **Example `migration_config.yaml`:**
     ```yaml
-    # Default chunk size for fetching data (optional)
-    default_chunk_size: 10000 
+    # Global migration settings (optional)
+    migration_settings:
+      # Default chunk size for fetching data (can be overridden per table)
+      default_chunk_size: 10000
+      # Globally enable/disable index migration (default: false)
+      # Can be overridden per table. Indexes are created *after* data migration.
+      migrate_indexes_globally: true
 
     tables:
-      # Example 1: Full table migration
+      # Example 1: Full table migration with global index setting (true in this case)
       - name: EMPLOYEES
         mode: full
         # Optional: Override default chunk size for this table
-        chunk_size: 5000 
+        chunk_size: 5000
+        # migrate_indexes: true # Not needed, inherits global setting
 
-      # Example 2: Custom query migration
+      # Example 2: Custom query migration, explicitly disabling index migration for this table
       - name: DEPARTMENTS_ACTIVE
         # Target table name can be different if needed
-        target_table: DEPARTMENTS 
+        target_table: DEPARTMENTS
         mode: custom
         query: |
-          SELECT department_id, department_name, manager_id, location_id 
-          FROM DEPARTMENTS 
+          SELECT department_id, department_name, manager_id, location_id
+          FROM DEPARTMENTS
           WHERE status = 'ACTIVE'
           ORDER BY department_id
         # Optional: Chunk size for this specific query
-        chunk_size: 1000 
+        chunk_size: 1000
+        # Override global setting: Do not migrate indexes for this specific table
+        migrate_indexes: false
+
+      # Example 3: Full table migration, explicitly enabling index migration (overrides global if it were false)
+      - name: JOB_HISTORY
+        mode: full
+        migrate_indexes: true # Explicitly enable index migration for this table
     ```
 
 ## ▶️ Usage
@@ -78,7 +99,14 @@ Whether you need to move entire tables or just specific subsets of data using cu
 Run the migration tool from your terminal:
 
 ```bash
+# Ensure your virtual environment is activated
+# e.g., source venv/bin/activate or venv\Scripts\activate
+
+# Run using the installed script (if using uv or pip install -e .)
 oracle-migrate
+
+# Or run directly via Python
+# python -m oracle_table_migration.main
 ```
 
 By default, it looks for `config/migration_config.yaml`. You can specify a different configuration file using the `--config` option:
@@ -87,7 +115,7 @@ By default, it looks for `config/migration_config.yaml`. You can specify a diffe
 oracle-migrate --config /path/to/your/custom_config.yaml
 ```
 
-The tool will then connect to the databases, validate schemas, and migrate the data for each table defined in your configuration file.
+The tool will then connect to the databases, validate schemas, migrate the data, and optionally create indexes for each table defined in your configuration file.
 
 ## 📜 License
 
