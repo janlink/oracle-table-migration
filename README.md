@@ -20,7 +20,7 @@ Whether you need to move entire tables, specific subsets of data using custom qu
 
 1.  Clone the repository:
     ```bash
-    git clone <your-repo-url>
+    git clone https://github.com/janlink/oracle-table-migration.git
     cd oracle-table-migration
     ```
 2.  Install the package (preferably in a virtual environment using `uv`):
